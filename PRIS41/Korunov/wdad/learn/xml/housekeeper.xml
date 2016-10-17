@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE housekeeper SYSTEM "housekeeper.dtd">
+<housekeeper>
+	<tariffs coldwater="100" electricity="100" gas="105.0" hotwater="100"/>
+	<building flatsquantity="10" number="20" street="michurina">
+		<flat area="52" number="1" personsquantity="3">
+                    <registration month="8" year="2011">
+                            <coldwater>330</coldwater>
+                            <hotwater>220</hotwater>
+                            <electricity>150</electricity>
+                            <gas>115</gas>
+			</registration>
+			<registration month="12" year="2011">
+                            <coldwater>333</coldwater>
+                            <hotwater>222</hotwater>
+                            <electricity>150</electricity>
+                            <gas>100</gas>
+			</registration>
+                        <registration month="1" year="2012">
+                            <coldwater>336</coldwater>
+                            <hotwater>224</hotwater>
+                            <electricity>156</electricity>
+                            <gas>120</gas>
+			</registration>
+		</flat>
+                <flat area="54" number="3" personsquantity="4">
+			<registration month="2" year="2011">
+                            <coldwater>339</coldwater>
+                            <hotwater>222</hotwater>
+                            <electricity>150</electricity>
+                            <gas>100</gas>
+			</registration>
+                        <registration month="3" year="2011">
+                            <coldwater>345</coldwater>
+                            <hotwater>228</hotwater>
+                            <electricity>160</electricity>
+                            <gas>125</gas>
+			</registration>
+		</flat>
+	</building>
+</housekeeper>
