@@ -1,5 +1,8 @@
 package PRIS41.Korunov.wdad.learn.xml;
 
+import PRIS41.Korunov.wdad.learn.rmi.Building;
+import PRIS41.Korunov.wdad.learn.rmi.Flat;
+import PRIS41.Korunov.wdad.learn.rmi.Registration;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,10 +15,14 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class XmlTask {
     
-    private class Registration  {
+    private class RegistrationValues  {
         public double coldwaterReg = 0;
         public double hotwaterReg = 0;
         public double electricityReg = 0;
@@ -23,13 +30,20 @@ public class XmlTask {
     }
     
     private Document doc;
-    private final String path = "src/PRIS41/Korunov/wdad/learn/xml/housekeeper.xml";
+    private String path;
     
     public XmlTask() 
             throws IOException, ParserConfigurationException, SAXException{ 
+        this("src/PRIS41/Korunov/wdad/learn/xml/housekeeper.xml");
         
         generateDocument();
     }       
+    
+    public XmlTask(String path) 
+            throws IOException, ParserConfigurationException, SAXException{ 
+        this.path = path;
+        generateDocument();
+    } 
     
     public double getBill(String street, int buildingNumber, int flatNumber){
         
@@ -51,10 +65,10 @@ public class XmlTask {
             prevRegistration = getPrevRegistration(registrations, lastYearReg, lastMonthReg);
         }      
         
-        Registration reg = new Registration();
+        RegistrationValues reg = new RegistrationValues();
         if(lastRegistration !=null && prevRegistration !=  null){
-            Registration lastReg = getReg(lastRegistration);
-            Registration prevReg = getReg(prevRegistration);
+            RegistrationValues lastReg = getReg(lastRegistration);
+            RegistrationValues prevReg = getReg(prevRegistration);
             reg.coldwaterReg = lastReg.coldwaterReg - prevReg.coldwaterReg;
             reg.hotwaterReg = lastReg.hotwaterReg - prevReg.hotwaterReg;
             reg.electricityReg = lastReg.electricityReg - prevReg.electricityReg;
@@ -110,6 +124,49 @@ public class XmlTask {
                 updateDocument();
             }
         }
+    }
+    
+    public Flat getFlat(Building building, int flatNumber){
+        NodeList buildings = doc.getElementsByTagName("building");
+        NodeList flats = getFlatsNeededBuild(buildings, building.getStreet(), building.getNumber());
+        NodeList registrations = getRegistrationsNeededFlat(flats, flatNumber);
+        int personsQuantity=0;
+        double area=0;
+        
+        ArrayList<Registration> regs = new ArrayList();
+        
+        if(flats != null){
+            for (int i= 0; i < flats.getLength(); i++) { //поиск нужной квартиры
+                if (flats.item(i).getNodeName().equals("flat") && 
+                        Integer.valueOf(flats.item(i).getAttributes().getNamedItem("number").getNodeValue()) == flatNumber){
+                    personsQuantity = Integer.valueOf(flats.item(i).getAttributes().getNamedItem("personsquantity").getNodeValue());
+                    area = Double.valueOf(flats.item(i).getAttributes().getNamedItem("area").getNodeValue());
+                }
+            }
+        }    
+        
+        if(registrations != null){
+            for (int i = 0; i < registrations.getLength(); i++) {
+                if(registrations.item(i).getNodeName().equals("registration")){ 
+                    
+                    int year = Integer.valueOf(registrations.item(i).getAttributes().getNamedItem("year").getNodeValue());
+                    int month = Integer.valueOf(registrations.item(i).getAttributes().getNamedItem("month").getNodeValue());
+                    
+                    Calendar registrationDate = Calendar.getInstance();
+                    registrationDate.set(Calendar.YEAR, year);
+                    registrationDate.set(Calendar.MONTH, month);
+                    
+                    RegistrationValues regValues = getReg(registrations.item(i));
+                    
+                    Registration reg = new Registration(registrationDate, regValues.coldwaterReg,
+                            regValues.hotwaterReg, regValues.electricityReg, regValues.gasReg);
+                    regs.add(reg);
+                }
+            }
+        }
+        
+        Flat flat = new Flat(flatNumber, personsQuantity, area, regs);        
+        return flat;
     }
     
     private void generateDocument() 
@@ -200,8 +257,8 @@ public class XmlTask {
         return registration;
     }   
 
-    private Registration getReg(Node registration){
-        Registration reg = new Registration();
+    private RegistrationValues getReg(Node registration){
+        RegistrationValues reg = new RegistrationValues();
         NodeList attributes = registration.getChildNodes();
         for (int i = 0; i < attributes.getLength(); i++) {
             if(attributes.item(i).getNodeName().equals("coldwater")){
