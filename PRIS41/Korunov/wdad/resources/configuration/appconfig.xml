@@ -24,7 +24,7 @@
             </registry>
         </server>
         <client>
-            <policypath>client.policy</policypath>
+            <policypath>security.policy</policypath>
             <usecodebaseonly>no</usecodebaseonly>
         </client>
         <classprovider>http://www.yourhost.free.ru/cp/cp.jar</classprovider>
